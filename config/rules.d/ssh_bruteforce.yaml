@@ -1,0 +1,5 @@
+# Example detection rule config (YAML)
+rule: ssh_bruteforce
+description: Flag IPs with >= threshold failed SSH attempts
+threshold: 5
+window_minutes: 60

@@ -1,0 +1,2 @@
+# Example cron entry: run every 30 minutes
+*/30 * * * * root /bin/bash /opt/securewatch/scripts/securewatch.sh

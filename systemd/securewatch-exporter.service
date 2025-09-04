@@ -1,0 +1,12 @@
+[Unit]
+Description=SecureWatch Prometheus Exporter
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/securewatch
+ExecStart=/opt/securewatch/.venv/bin/python /opt/securewatch/python/exporters/securewatch_exporter.py
+Restart=always
+User=securewatch
+
+[Install]
+WantedBy=multi-user.target

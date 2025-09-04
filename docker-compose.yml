@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  exporter:
+    build: .
+    ports:
+      - "9109:9109"
+    volumes:
+      - ./data:/app/data

@@ -1,0 +1,10 @@
+[Unit]
+Description=Run SecureWatch hourly
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+Unit=securewatch.service
+
+[Install]
+WantedBy=timers.target

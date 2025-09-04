@@ -1,0 +1,26 @@
+{
+  "title": "SecureWatch Overview",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Events (latest)",
+      "targets": [{"expr": "securewatch_events_total"}],
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "bargauge",
+      "title": "By Severity",
+      "targets": [{"expr": "sum by (severity) (securewatch_events_severity)"}],
+      "gridPos": {"x": 6, "y": 0, "w": 9, "h": 8}
+    },
+    {
+      "type": "bargauge",
+      "title": "By Category",
+      "targets": [{"expr": "sum by (category) (securewatch_events_category)"}],
+      "gridPos": {"x": 0, "y": 4, "w": 15, "h": 8}
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}
