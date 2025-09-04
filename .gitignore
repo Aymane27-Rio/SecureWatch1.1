@@ -1,0 +1,13 @@
+#Virtual envs
+.venv/
+venv/
+__pycache__/
+
+#Logs and Reports
+
+data/logs/*
+data/reports/*
+data/state/*
+
+# Secrets
+.env 
