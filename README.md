@@ -2,7 +2,7 @@
 
 SecureWatch is a modular toolkit to automate baseline security checks on Linux (Ubuntu/Kali), detect suspicious activity, and generate structured logs + human-readable reports. It also ships with a Prometheus exporter and a cloud (AWS) monitoring stub.
 
-> ⚠️ Run scripts that require privileged ops with `sudo`. Review code before running in production.
+> ⚠️ Run scripts that require privileged ops with `sudo`.
 
 ## Features
 - Modular **Bash** checks: users, ports, firewall, updates, AIDE/rkhunter hooks, file integrity.
@@ -16,7 +16,7 @@ SecureWatch is a modular toolkit to automate baseline security checks on Linux (
 # 0) Unzip and enter
 unzip securewatch-skeleton.zip && cd securewatch
 
-# 1) Install OS dependencies (Ubuntu/Kali via apt)
+# 1) Install OS dependencies
 make install-deps
 
 # 2) Create Python venv + deps (for reporting/exporter/cloud)
