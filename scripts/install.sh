@@ -11,7 +11,7 @@ sudo apt update
 sudo apt install -y jq curl lsof net-tools inotify-tools
 # Security tools
 sudo apt install -y rkhunter aide nmap
-# Python & mail (optional alerts)
+
 sudo apt install -y python3 python3-venv python3-pip
 # Ubuntu-friendly firewall (Kali may use nftables directly)
 sudo apt install -y ufw || true
