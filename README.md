@@ -12,6 +12,11 @@ SecureWatch is a modular toolkit to automate baseline security checks on Linux (
 - Optional **AWS security group audit** (overly permissive ingress).
 
 ## Quickstart
+
+New update: You can now run SecureWatch in two ways:
+
+### Native (Ubuntu/Kali)
+
 ```bash
 # 0) Unzip and enter
 unzip securewatch-skeleton.zip && cd securewatch
@@ -30,6 +35,22 @@ make exporter
 
 # (Optional) Install systemd timer for hourly scans
 sudo make enable-systemd   # edits may be required to point to your absolute path
+```
+
+### Or Dockerized (more recommended for portability)
+
+```bash
+# 0) Build the image
+docker build -t securewatch .
+
+# 1) Run a one-off security sweep
+docker run --rm -v $(pwd)/data:/app/data securewatch
+
+# Reports will be available under ./data/reports/
+
+# (Optional) Run with docker-compose
+docker compose up
+
 ```
 
 ## Layout
