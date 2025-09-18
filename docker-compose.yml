@@ -1,4 +1,5 @@
 version: "3.9"
+
 services:
   exporter:
     build: .
@@ -6,3 +7,24 @@ services:
       - "9109:9109"
     volumes:
       - ./data:/app/data
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - exporter
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  grafana-storage:

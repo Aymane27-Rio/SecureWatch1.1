@@ -1,17 +1,5 @@
 FROM python:3.11-slim
 
-# Linux dependencies
-RUN apt-get update && apt-get install -y \
-    bash \
-    cron \
-    auditd \
-    iproute2 \
-    iptables \
-    rkhunter \
-    aide \
-    sudo \
-    && rm -rf /var/lib/apt/lists/*
-
 # Creating the app directory
 WORKDIR /app
 
