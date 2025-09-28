@@ -74,3 +74,13 @@ docker compose up
 - AWS checks require credentials via environment or `~/.aws/credentials`.
 - Minimal sample detects `0.0.0.0/0` on sensitive ports (22/3389); extend as needed.
 
+## NEW: Local Web Dashboard (FastAPI backend + Vite frontend)
+
+Run the full stack:
+
+docker compose up --build -d
+
+- frontend -> http://localhost:3000
+- backend  -> http://localhost:8000
+- prometheus -> http://localhost:9090
+- grafana -> http://localhost:3001
