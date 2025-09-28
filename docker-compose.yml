@@ -36,5 +36,14 @@ services:
     depends_on:
       - prometheus
 
+  webapi:
+    build: ./webapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - exporter
+      - prometheus
+
+
 volumes:
   grafana-storage:
