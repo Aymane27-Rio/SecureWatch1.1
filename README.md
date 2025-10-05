@@ -74,3 +74,46 @@ docker compose up
 - AWS checks require credentials via environment or `~/.aws/credentials`.
 - Minimal sample detects `0.0.0.0/0` on sensitive ports (22/3389); extend as needed.
 
+## UPDATE 1: Local Web Dashboard (FastAPI backend + Vite frontend)
+
+Run the full stack:
+
+docker compose up --build -d
+
+- frontend -> http://localhost:3000
+- backend  -> http://localhost:8000
+- prometheus -> http://localhost:9090
+- grafana -> http://localhost:3001
+
+
+## UPDATE 2: 
+
+from the project root, run:
+
+```bash
+# 1) Build images and start services
+docker compose up --build -d
+
+# 2) Force a run of SecureWatch to produce events (if needed):
+# If the exporter is a one-shot, run it manually so it writes ./data/logs/events_*.json
+# If your exporter is triggered differently, follow your existing method:
+sudo make run    # (if this writes into ./data on the host)
+
+# 3) Check that the JSON file exists
+ls -l data/logs/events_*.json
+ls -l data/reports/*.html
+
+# 4) Trigger ingestion (either via API or let background task run)
+# If you set WEBAPI_API_KEY in docker-compose.yml to 'replace_with_a_strong_key'
+curl -X POST -H "X-API-Key: replace_with_a_strong_key" http://localhost:8000/ingest
+
+# 5) Query the WebAPI
+curl http://localhost:8000/hello
+curl http://localhost:8000/reports
+curl http://localhost:8000/events?limit=50
+
+# 6) Inspect the SQLite DB
+sqlite3 data/state/securewatch.db "SELECT count(*) FROM events;"
+sqlite3 data/state/securewatch.db "SELECT * FROM reports ORDER BY created_at DESC LIMIT 5;"
+
+```

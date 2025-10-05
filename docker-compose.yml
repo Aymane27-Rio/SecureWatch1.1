@@ -1,4 +1,3 @@
-
 services:
   exporter:
     build: .
@@ -6,6 +5,21 @@ services:
       - "9109:9109"
     volumes:
       - ./data:/app/data
+    environment:
+      - WEBAPI_INGEST_URL=http://webapi:8000/ingest
+      - WEBAPI_API_KEY=replace_with_a_strong_key
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
 
   prometheus:
     image: prom/prometheus:latest
@@ -19,11 +33,30 @@ services:
   grafana:
     image: grafana/grafana-oss:latest
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - grafana-storage:/var/lib/grafana
     depends_on:
       - prometheus
+
+    webapi:
+      build:
+        context: .
+        dockerfile: webapi/Dockerfile
+      ports:
+        - "8000:8000"
+      volumes:
+        - ./data:/app/data   # allow DB + reports persistence
+      environment:
+        - WEBAPI_DB_PATH=/app/data/state/securewatch.db
+        - WEBAPI_LOGS_DIR=/app/data/logs
+        - WEBAPI_API_KEY=replace_with_a_strong_key
+        - WEBAPI_ALLOW_SCAN=0   # set to "1" if for /scan endpoint allowed
+        - WEBAPI_INGEST_INTERVAL=60
+      depends_on:
+        - exporter
+
+
 
 volumes:
   grafana-storage:
