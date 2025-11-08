@@ -19,7 +19,9 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
+    depends_on:
+      - webapi
 
   prometheus:
     image: prom/prometheus:latest
@@ -39,7 +41,7 @@ services:
     depends_on:
       - prometheus
 
-    webapi:
+  webapi:
       build:
         context: .
         dockerfile: webapi/Dockerfile

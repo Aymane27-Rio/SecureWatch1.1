@@ -88,6 +88,27 @@ def get_event(eid: int):
         raise HTTPException(status_code=404, detail="event not found")
     return dict(r)
 
+@app.get("/metrics")
+def metrics():
+    conn = get_conn(DB_PATH)
+    cur = conn.cursor()
+    # last run from latest report ts
+    cur.execute("SELECT MAX(ts) as last_ts FROM reports")
+    row = cur.fetchone()
+    last_run = row[0] if row and row[0] is not None else None
+    # total events
+    cur.execute("SELECT COUNT(*) FROM events")
+    total_events = cur.fetchone()[0]
+    # by severity
+    cur.execute("SELECT COALESCE(severity, 0) as sev, COUNT(*) as c FROM events GROUP BY sev ORDER BY sev")
+    sev_counts = {int(sev): c for (sev, c) in cur.fetchall()}
+    conn.close()
+    return {
+        "last_run": last_run,
+        "total_events": total_events,
+        "by_severity": sev_counts,
+    }
+
 @app.post("/ingest")
 def manual_ingest(x_api_key: str = Header(None), background: BackgroundTasks = None):
     if not check_api_key(x_api_key):

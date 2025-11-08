@@ -37,6 +37,157 @@ make exporter
 sudo make enable-systemd   # edits may be required to point to your absolute path
 ```
 
+---
+
+## Web App Setup (Linux)
+
+This section explains how to run the SecureWatch Web API (FastAPI) and the Vite/React Web Dashboard locally on a Linux host.
+
+### Prerequisites
+
+- Python 3.11+
+- Node.js 18+
+- SQLite3 (CLI) optional for inspecting DB
+- Docker Desktop/Engine (optional, for containerized runs)
+
+### 1) Prepare data directories
+
+```bash
+mkdir -p data/logs data/reports data/state
+```
+
+### 2) Start the Web API (FastAPI + Uvicorn)
+
+```bash
+cd webapi
+python -m venv .venv && source .venv/bin/activate   # or use your preferred env manager
+pip install -r requirements.txt
+
+# Optional: set API key and paths (defaults shown)
+export WEBAPI_DB_PATH="$(pwd)/../data/state/securewatch.db"
+export WEBAPI_LOGS_DIR="$(pwd)/../data/logs"
+# export WEBAPI_API_KEY="replace_with_a_strong_key"
+# export WEBAPI_ALLOW_SCAN=0
+# export WEBAPI_INGEST_INTERVAL=60
+
+uvicorn webapi.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Verify API is up:
+
+```bash
+curl http://localhost:8000/hello
+curl http://localhost:8000/reports
+```
+
+### 3) Generate sample data (so the Web App has something to show)
+
+Run SecureWatch once to write logs/reports under `data/`.
+
+```bash
+# From repo root
+sudo make run           # or run your scripts/securewatch.sh directly
+
+# Confirm artifacts exist
+ls -l data/logs/
+ls -l data/reports/
+```
+
+Optionally trigger ingestion via API (if you set an API key, pass it via header):
+
+```bash
+curl -X POST -H "X-API-Key: ${WEBAPI_API_KEY:-}" http://localhost:8000/ingest
+```
+
+### 4) Start the Web Dashboard (Vite/React)
+
+```bash
+cd frontend
+npm install
+npm run dev   # http://localhost:5173
+```
+
+Notes:
+
+- The dev server proxies `/api` to `http://localhost:8000` (configured in `vite.config.js`).
+- If the backend is not running, the browser console/terminal will show proxy ECONNREFUSED.
+
+Production preview:
+
+```bash
+npm run build
+npm run preview   # http://localhost:3000
+```
+
+### 5) Dockerized Web Dashboard
+
+Build and run the frontend image (served by Nginx):
+
+```bash
+cd frontend
+docker build -t securewatch-frontend .
+docker run --rm -p 8080:80 securewatch-frontend   # app at http://localhost:8080
+```
+
+The container proxies `/api` to `http://host.docker.internal:8000` by default (see `frontend/nginx.conf`). Ensure the Web API is running on the host at port 8000.
+
+### 6) Dockerized Web API
+
+```bash
+docker build -f webapi/Dockerfile -t securewatch-webapi .
+docker run --rm -p 8000:8000 \
+  -e WEBAPI_DB_PATH=/app/data/state/securewatch.db \
+  -e WEBAPI_LOGS_DIR=/app/data/logs \
+  -e WEBAPI_API_KEY=replace_with_a_strong_key \
+  -v $(pwd)/data:/app/data \
+  securewatch-webapi
+```
+
+Now the frontend container at `http://localhost:8080` can reach the API via `/api`.
+
+### 7) Optional: Docker Compose
+
+There is a `docker-compose.yml` in the repo. Ensure the ports for the `frontend` service map to the container port exposed by its Dockerfile (80). For example:
+
+```yaml
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"   # host:container
+```
+
+Then run:
+
+```bash
+docker compose up --build -d
+```
+
+### Verification Checklist
+
+- Web API
+  - `curl http://localhost:8000/hello` returns JSON.
+  - `curl http://localhost:8000/reports` returns a list (possibly empty initially).
+  - After running `make run` (or your script), `curl http://localhost:8000/reports` shows new items.
+
+- Web App
+  - Open the UI (dev: `http://localhost:5173`, preview: `http://localhost:3000`, Docker: `http://localhost:8080`).
+  - Dashboard shows metrics (last run, totals) and reports list.
+  - Clicking “view raw JSON” on a report opens `/api/reports/{id}`.
+
+### Troubleshooting
+
+- Proxy ECONNREFUSED in `npm run dev`
+  - Ensure the Web API is running at `http://localhost:8000`.
+  - The Vite dev proxy forwards `/api` → backend; if backend is down, calls fail.
+
+- 502/404 from frontend in Docker
+  - Verify Web API is reachable on the host `:8000`.
+  - Confirm `host.docker.internal` resolves (Docker Desktop). If using Linux Engine without this alias, update `frontend/nginx.conf` to point to the correct host/IP.
+
+- Empty dashboard
+  - Run a SecureWatch scan to generate data under `data/`.
+  - Trigger `/ingest` or wait for periodic ingest (default every 60s).
+
 ### Or Dockerized (more recommended for portability)
 
 ```bash
